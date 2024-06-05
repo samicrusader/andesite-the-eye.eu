@@ -108,10 +108,10 @@ func HandleDirectoryListing(getAccess func(http.ResponseWriter, *http.Request) (
 					// resolve link, then do this again
 					realpath, _ := filepath.EvalSymlinks(fileRoot + qpath + files[i].Name())
 					if realpath == "" {
-						util.LogError("symlink", fileRoot + qpath + files[i].Name(), "is pointing to a non-existing file")
+						util.LogError("symlink", fileRoot+qpath+files[i].Name(), "is pointing to a non-existing file")
 						continue
 					}
-					
+
 					symfile, err := os.Lstat(realpath)
 					if err != nil {
 						util.LogError(err)
@@ -127,7 +127,7 @@ func HandleDirectoryListing(getAccess func(http.ResponseWriter, *http.Request) (
 					}
 				} else {
 					if files[i].IsDir() {
-						a = name
+						a = name + "/"
 						ext = ".folder"
 						isFile = false
 					} else {
