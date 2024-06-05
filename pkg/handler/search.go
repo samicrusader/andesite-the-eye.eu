@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/nektro/andesite/pkg/config"
-	"github.com/nektro/andesite/pkg/db"
-	"github.com/nektro/andesite/pkg/idata"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/config"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/db"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 
 	etc "github.com/nektro/go.etc"
 	oauth2 "github.com/nektro/go.oauth2"

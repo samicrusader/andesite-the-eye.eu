@@ -6,11 +6,11 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/nektro/andesite/pkg/config"
-	"github.com/nektro/andesite/pkg/db"
-	"github.com/nektro/andesite/pkg/fsdb"
-	"github.com/nektro/andesite/pkg/handler"
-	"github.com/nektro/andesite/pkg/idata"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/config"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/db"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/fsdb"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/handler"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 
 	"github.com/aymerick/raymond"
 	"github.com/nektro/go-util/arrays/stringsu"
@@ -20,13 +20,13 @@ import (
 	etc "github.com/nektro/go.etc"
 	"github.com/nektro/go.etc/htp"
 
-	_ "github.com/nektro/andesite/statik"
+	_ "github.com/samicrusader/andesite-the-eye.eu/statik"
 	. "github.com/nektro/go-util/alias"
 )
 
 // version var overwritten by build_all.sh
 var (
-	Version = "vMASTER"
+	Version = "the-eye.eu-vMASTER"
 )
 
 func main() {

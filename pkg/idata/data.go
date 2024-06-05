@@ -3,7 +3,7 @@ package idata
 import (
 	"strings"
 
-	"github.com/nektro/andesite/pkg/itypes"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/itypes"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nektro/go-util/arrays/stringsu"

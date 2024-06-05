@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nektro/andesite/pkg/idata"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 
 	"github.com/nektro/go-util/arrays/stringsu"
 	"github.com/nektro/go-util/util"

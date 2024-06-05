@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/nektro/andesite/pkg/db"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/db"
 
 	"github.com/nektro/go.etc/htp"
 

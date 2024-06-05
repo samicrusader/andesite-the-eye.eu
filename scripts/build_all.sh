@@ -12,7 +12,7 @@ build_template() {
     ext=$3
     date=$(date +'%Y.%m.%d')
     version=${CIRCLE_BUILD_NUM-$date}
-    tag=v$version-$(git log --format=%h -1)
+    tag=the-eye.eu-v$version-$(git log --format=%h -1)
     echo $tag-$GOOS-$GOARCH
     go build -ldflags="-s -w -X main.Version=$tag" -o ./bin/andesite-$tag-$GOOS-$GOARCH$ext
 }

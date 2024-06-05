@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nektro/andesite/pkg/idata"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 )
 
 func processListingURL(pt map[string]string, upathS string) (string, string, error) {

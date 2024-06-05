@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nektro/andesite/pkg/db"
-	"github.com/nektro/andesite/pkg/idata"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/db"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 
 	"github.com/gorilla/sessions"
 	"github.com/nektro/go-util/arrays/stringsu"
