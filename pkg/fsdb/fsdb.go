@@ -41,6 +41,13 @@ func Init(mp map[string]string, rt string) {
 			// Remove base directory from path
 			relpath := "/" + rt + strings.TrimPrefix(fp, bd)
 
+			for _, item := range idata.Config.HashExcl {
+				if strings.TrimSuffix(item, "/") == fp {
+					util.Log("fsdb:", "skipping", fp, "due to exclude")
+					return godirwalk.SkipThis
+				}
+			}
+
 			// Remove dotfiles and ignore if directory
 			if strings.HasSuffix(relpath, "/"+rt+"/.") || fi.IsDir() {
 				return nil

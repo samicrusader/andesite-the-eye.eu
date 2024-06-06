@@ -18,8 +18,9 @@ type Config struct {
 	VerboseFS bool              `json:"verbose_fsdb"`
 	RootsPub  [][]string        `json:"roots_public"`
 	RootsPrv  [][]string        `json:"roots_private"`
+	ScanSimul int               `json:"scan_concurrency"`
+	HashExcl  []string
 	OffHashes []string
-	ScanSimul int
 	CRootsPub []string
 	CRootsPrv []string
 }
