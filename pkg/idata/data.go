@@ -7,7 +7,6 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nektro/go-util/arrays/stringsu"
-	"github.com/nektro/go-util/types"
 	sdrie "github.com/nektro/go.sdrie"
 )
 
@@ -22,7 +21,6 @@ var (
 	DataPathsPub   = map[string]string{}
 	DataPathsPrv   = map[string]string{}
 	Hashes         = []string{"MD5", "SHA1", "SHA256", "SHA512", "SHA3_512", "BLAKE2b_512"}
-	HashingSem     *types.Semaphore
 	TempStore      = sdrie.New()
 )
 

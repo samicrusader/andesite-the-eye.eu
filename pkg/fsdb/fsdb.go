@@ -1,97 +1,137 @@
 package fsdb
 
 import (
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/db"
+	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
-
-	"github.com/samicrusader/andesite-the-eye.eu/pkg/db"
-	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
+	"sync/atomic"
 
 	"github.com/karrick/godirwalk"
 	"github.com/nektro/go-util/util"
 )
 
+const bufSize = 1 << 21
+
+var syncer = int64(1 << 62)
+
+type Job struct {
+	f *db.File
+}
+
 func Init(mp map[string]string, rt string) {
-	bd, ok := mp[rt]
-	if !ok {
+	bd, err := mp[rt]
+	if !err {
 		return
 	}
-	util.Log("fsdb:", rt+":", "scan begin...")
-	start := time.Now()
+
+	jobs := make(chan Job)
+
+	for i := 0; i < idata.Config.ScanSimul; i++ {
+		go worker(jobs)
+	}
+
+	util.Log("fsdb:", "init: walking directory", bd)
 	godirwalk.Walk(bd, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
-			fpathS, _ := filepath.Abs(osPathname)
-			if strings.Contains(fpathS, "/.") {
+			fp, _ := filepath.Abs(osPathname)
+			fi, _ := os.Lstat(fp)
+
+			// Remove base directory from path
+			relpath := "/" + rt + strings.TrimPrefix(fp, bd)
+
+			// Remove dotfiles and ignore if directory
+			if strings.HasSuffix(relpath, "/"+rt+"/.") || fi.IsDir() {
 				return nil
 			}
-			upathS := "/" + rt + strings.TrimPrefix(fpathS, bd)
-			s, _ := os.Lstat(osPathname)
-			if s.IsDir() {
-				return nil
-			}
-			if s.Mode()&os.ModeSymlink != 0 {
-				realpath, _ := filepath.EvalSymlinks(osPathname)
-				if realpath == "" {
-					util.LogError("fsdb:", rt+":", "symlink", osPathname, "is pointing to a non-existing file")
+
+			// Symlink detection
+			if fi.Mode()&os.ModeSymlink != 0 {
+				sympath, _ := filepath.EvalSymlinks(fp)
+
+				if idata.Config.VerboseFS {
+					util.Log("fsdb:", "walk: hit a symlink:", fp)
+				}
+
+				if sympath == "" {
+					util.LogError("fsdb:", "walk:", "symlink", fp, "is pointing to a non-existing file")
 					return godirwalk.SkipThis
 				}
-				s, err := os.Lstat(realpath)
+
+				// Query symlink
+				s, err := os.Lstat(sympath)
 				if err != nil {
-					util.LogError("fsdb:", rt+":", err)
+					util.LogError("fsdb:", "walk/symlink:", err)
 					return nil
 				}
 				if s.IsDir() {
 					return nil
 				}
 			}
-			idata.HashingSem.Add()
-			defer func() {
-				defer idata.HashingSem.Done()
-				insertFile(&db.File{
-					0,
-					rt,
-					upathS, osPathname,
-					s.Size(), "",
-					s.ModTime().UTC().Unix(), "",
-					"", "", "", "", "", "",
-				})
-			}()
+			f := &db.File{
+				0,
+				rt,
+				relpath, fp,
+				fi.Size(), "",
+				fi.ModTime().UTC().Unix(), "",
+				"", "", "", "", "", "",
+			}
+			jobs <- Job{f}
+			atomic.AddInt64(&syncer, 1)
 			return nil
 		},
 		Unsorted:            true,
 		FollowSymbolicLinks: true,
 	})
-	dur := time.Since(start)
-	util.Log("fsdb:", rt+":", "scan completed in "+dur.String())
+	util.Log("fsdb:", "init: done walking directory", bd)
 }
 
-func insertFile(f *db.File) {
-	oldF, ok := db.File{}.ByPath(f.Path)
+func worker(jobs <-chan Job) {
+	buf := make([]byte, bufSize)
+	for job := range jobs {
+		insertFile(job, buf)
+		atomic.AddInt64(&syncer, -1)
+	}
+}
+
+func insertFile(job Job, buf []byte) {
+	f := job.f
+	// Check against old DB entry
+	oldentry, ok := db.File{}.ByPath(f.Path)
 	if ok {
-		if oldF.ModTime == f.ModTime {
-			// File exists and ModTime has not changed, skip
+		// File exists and modified time has not changed
+		if oldentry.ModTime == f.ModTime {
 			if idata.Config.VerboseFS {
-				util.Log("fsdb:", "skp:", f.Path)
+				util.Log("fsdb:", "skipped:", f.Path)
 			}
 			return
 		}
-		// File exists but ModTime changed, updated
-		f.PopulateHashes(true)
-		f.SetSize(f.Size)
-		f.SetModTime(f.ModTime)
+
 		if idata.Config.VerboseFS {
-			util.Log("fsdb:", "upd:", f.Path)
+			util.Log("fsdb:", "processing:", oldentry.Path)
+		}
+
+		// File exists but changed
+		oldentry.PathFull = f.PathFull
+		oldentry.PopulateHashes(true)
+		oldentry.SetSize(f.Size)
+		oldentry.SetModTime(f.ModTime)
+		db.DeleteFile(oldentry.Root, oldentry.Path)
+		db.CreateFile(oldentry.Root, oldentry.Path, oldentry.Size, oldentry.ModTime, oldentry.MD5, oldentry.SHA1, oldentry.SHA256, oldentry.SHA512, oldentry.SHA3, oldentry.BLAKE2b)
+		if idata.Config.VerboseFS {
+			util.Log("fsdb:", "updated:", oldentry.Path)
+		}
+		return
+	} else {
+		// File does not exist, add
+		f.PopulateHashes(true)
+		db.CreateFile(f.Root, f.Path, f.Size, f.ModTime, f.MD5, f.SHA1, f.SHA256, f.SHA512, f.SHA3, f.BLAKE2b)
+		if idata.Config.VerboseFS {
+			util.Log("fsdb:", "added:", f.Path)
 		}
 		return
 	}
-	// File does not exist, add
-	if idata.Config.Verbose {
-		util.Log("fsdb:", "add:", f.Path)
-	}
-	f.PopulateHashes(false)
-	db.CreateFile(f.Root, f.Path, f.Size, f.ModTime, f.MD5, f.SHA1, f.SHA256, f.SHA512, f.SHA3, f.BLAKE2b)
 }
 
 func DeInit(mp map[string]string, rt string) {

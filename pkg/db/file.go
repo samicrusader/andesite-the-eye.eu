@@ -39,6 +39,10 @@ func CreateFile(rt, pt string, sz, mt int64, h1, h2, h3, h4, h5, h6 string) {
 	DB.Build().Ins(ctFile, id, rt, pt, sz, mt, h1, h2, h3, h4, h5, h6).Exe()
 }
 
+func DeleteFile(rt, pt string) {
+	DB.Build().Del(ctFile).Wr("path", "like", pt).Exe()
+}
+
 func DropFilesFromRoot(rt string) {
 	DB.Build().Del(ctFile).Wh("root", rt).Exe()
 }

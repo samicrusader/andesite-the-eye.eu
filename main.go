@@ -14,14 +14,13 @@ import (
 
 	"github.com/aymerick/raymond"
 	"github.com/nektro/go-util/arrays/stringsu"
-	"github.com/nektro/go-util/types"
 	"github.com/nektro/go-util/util"
 	"github.com/nektro/go-util/vflag"
 	etc "github.com/nektro/go.etc"
 	"github.com/nektro/go.etc/htp"
 
-	_ "github.com/samicrusader/andesite-the-eye.eu/statik"
 	. "github.com/nektro/go-util/alias"
+	_ "github.com/samicrusader/andesite-the-eye.eu/statik"
 )
 
 // version var overwritten by build_all.sh
@@ -45,7 +44,7 @@ func main() {
 	vflag.BoolVar(&idata.Config.Verbose, "verbose", false, "")
 	vflag.BoolVar(&idata.Config.VerboseFS, "fsdb-verbose", false, "")
 	vflag.StringArrayVar(&idata.Config.OffHashes, "disable-hash", []string{}, "")
-	vflag.IntVar(&idata.Config.HashPllel, "hash-concurrency", runtime.NumCPU(), "")
+	vflag.IntVar(&idata.Config.ScanSimul, "scan-concurrency", runtime.NumCPU(), "number of threads to use for fsdb scan queueing")
 	vflag.StringArrayVar(&idata.Config.CRootsPub, "custom-root-public", []string{}, "")
 	vflag.StringArrayVar(&idata.Config.CRootsPrv, "custom-root-private", []string{}, "")
 	vflag.BoolVar(&config.GlobalSearchOff, "disable-global-search", false, "")
@@ -82,8 +81,6 @@ func main() {
 	for _, item := range idata.Config.OffHashes {
 		idata.DisableHash(item)
 	}
-
-	idata.HashingSem = types.NewSemaphore(idata.Config.HashPllel)
 
 	for _, item := range idata.Config.CRootsPub {
 		idata.Config.RootsPub = append(idata.Config.RootsPub, strings.SplitN(item, "=", 2))

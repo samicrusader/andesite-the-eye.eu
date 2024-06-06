@@ -19,7 +19,7 @@ type Config struct {
 	RootsPub  [][]string        `json:"roots_public"`
 	RootsPrv  [][]string        `json:"roots_private"`
 	OffHashes []string
-	HashPllel int
+	ScanSimul int
 	CRootsPub []string
 	CRootsPrv []string
 }
