@@ -35,12 +35,12 @@ func CreateFile(rt, pt string, sz, mt int64, h1, h2, h3, h4, h5, h6 string) {
 	dbstorage.InsertsLock.Lock()
 	defer dbstorage.InsertsLock.Unlock()
 	//
-	id := FS.QueryNextID(ctFile)
-	FS.Build().Ins(ctFile, id, rt, pt, sz, mt, h1, h2, h3, h4, h5, h6).Exe()
+	id := db.QueryNextID(ctFile)
+	db.Build().Ins(ctFile, id, rt, pt, sz, mt, h1, h2, h3, h4, h5, h6).Exe()
 }
 
 func DropFilesFromRoot(rt string) {
-	FS.Build().Del(ctFile).Wh("root", rt).Exe()
+	db.Build().Del(ctFile).Wh("root", rt).Exe()
 }
 
 // Scan implements dbstorage.Scannable
@@ -69,7 +69,7 @@ func (v *File) i() string {
 }
 
 func (File) b() dbstorage.QueryBuilder {
-	return FS.Build().Se("*").Fr(ctFile)
+	return db.Build().Se("*").Fr(ctFile)
 }
 
 func (File) All() []*File {
@@ -112,7 +112,7 @@ func (v *File) setHash(alg, hv string, doUp bool) {
 	}
 	if doUp && stringsu.Contains(idata.Hashes, alg) {
 		hk := strings.ToLower(strings.TrimSuffix(alg, "_512"))
-		FS.Build().Up(ctFile, "hash_"+hk, hv).Wh("id", v.i()).Exe()
+		db.Build().Up(ctFile, "hash_"+hk, hv).Wh("id", v.i()).Exe()
 	}
 }
 
@@ -125,11 +125,11 @@ func hash(algo string, pathS string) string {
 func (v *File) SetSize(x int64) {
 	v.Size = x
 	n := strconv.FormatInt(x, 10)
-	Up(v, FS, ctFile, "size", n)
+	Up(v, db, ctFile, "size", n)
 }
 
 func (v *File) SetModTime(x int64) {
 	v.ModTime = x
 	n := strconv.FormatInt(x, 10)
-	Up(v, FS, ctFile, "mod_time", n)
+	Up(v, db, ctFile, "mod_time", n)
 }

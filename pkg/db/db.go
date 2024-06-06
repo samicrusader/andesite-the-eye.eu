@@ -11,7 +11,6 @@ import (
 
 var (
 	db dbstorage.Database
-	FS dbstorage.Database
 )
 
 const (
@@ -32,9 +31,7 @@ func Init() {
 	db.CreateTableStruct(ctUserAccess, UserAccess{})
 	db.CreateTableStruct(ctShare, Share{})
 	db.CreateTableStruct(ctDiscordRoleAccess, DiscordRoleAccess{})
-
-	FS, _ = dbstorage.ConnectSqlite(etc.DataRoot() + "/files.db")
-	FS.CreateTableStruct(ctFile, File{})
+	db.CreateTableStruct(ctFile, File{})
 }
 
 func Upgrade() {
@@ -59,7 +56,6 @@ func Upgrade() {
 
 func Close() {
 	db.Close()
-	FS.Close()
 }
 
 func SaveOAuth2InfoCb(w http.ResponseWriter, r *http.Request, provider string, id string, name string, resp map[string]interface{}) {
@@ -76,7 +72,7 @@ func SaveOAuth2InfoCb(w http.ResponseWriter, r *http.Request, provider string, i
 }
 
 func FolderSize(p string) (size int64, count int64) {
-	rows := FS.Build().Se("sum(size), count(*)").Fr(ctFile).WR("path", "like", "?||'%'", true, p).Exe()
+	rows := db.Build().Se("sum(size), count(*)").Fr(ctFile).WR("path", "like", "?||'%'", true, p).Exe()
 	defer rows.Close()
 	rows.Next()
 	rows.Scan(&size, &count)
