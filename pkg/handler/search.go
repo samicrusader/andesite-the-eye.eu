@@ -37,8 +37,12 @@ func HandleSearchAPI(w http.ResponseWriter, r *http.Request) {
 	q := db.DB.Build().Se("*").Fr("files")
 	{
 		qq := r.Form.Get("q")
+		wh := r.Form.Get("w")
 		if len(qq) > 0 {
-			q.WR("path", "like", "'%'||?||'%'", true, qq)
+			lol := q.WR("path", "like", "'%'||?||'%'", true, qq)
+			if len(wh) > 0 {
+				lol = lol.WR("path", "like", "'%'||?||'%'", true, wh)
+			}
 		}
 	}
 	for _, item := range []string{"md5", "sha1", "sha256", "sha512", "sha3", "blake2b"} {
