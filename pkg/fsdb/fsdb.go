@@ -114,7 +114,10 @@ func insertFile(job Job, buf []byte) {
 
 		// File exists but changed
 		oldentry.PathFull = f.PathFull
-		oldentry.PopulateHashes(true)
+		ok := oldentry.PopulateHashes(buf)
+		if !ok {
+			return
+		}
 		oldentry.SetSize(f.Size)
 		oldentry.SetModTime(f.ModTime)
 		db.DeleteFile(oldentry.Root, oldentry.Path)
@@ -125,7 +128,10 @@ func insertFile(job Job, buf []byte) {
 		return
 	} else {
 		// File does not exist, add
-		f.PopulateHashes(true)
+		ok := f.PopulateHashes(buf)
+		if !ok {
+			return
+		}
 		db.CreateFile(f.Root, f.Path, f.Size, f.ModTime, f.MD5, f.SHA1, f.SHA256, f.SHA512, f.SHA3, f.BLAKE2b)
 		if idata.Config.VerboseFS {
 			util.Log("fsdb:", "added:", f.Path)

@@ -1,15 +1,21 @@
 package db
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"database/sql"
+	"encoding/hex"
+	"golang.org/x/crypto/blake2b"
+	"golang.org/x/crypto/sha3"
+	"io"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/samicrusader/andesite-the-eye.eu/pkg/idata"
 
-	"github.com/nektro/go-util/arrays/stringsu"
 	"github.com/nektro/go-util/util"
 	dbstorage "github.com/nektro/go.dbstorage"
 )
@@ -93,37 +99,66 @@ func (File) ByPath(path string) (*File, bool) {
 // modifiers
 //
 
-func (v *File) PopulateHashes(doUp bool) {
-	for _, item := range idata.Hashes {
-		v.setHash(item, hash(item, v.PathFull), doUp)
+func (v *File) PopulateHashes(buf []byte) bool {
+	fullBuf := buf
+	path := v.PathFull
+	file, err := os.Open(path)
+	if err != nil {
+		util.LogError("fsdb:", "hasher:", "Failure reading file", path+":", err)
+		return false
 	}
-}
-
-func (v *File) setHash(alg, hv string, doUp bool) {
-	switch alg {
-	case "MD5":
-		v.MD5 = hv
-	case "SHA1":
-		v.SHA1 = hv
-	case "SHA256":
-		v.SHA256 = hv
-	case "SHA512":
-		v.SHA512 = hv
-	case "SHA3_512":
-		v.SHA3 = hv
-	case "BLAKE2b_512":
-		v.BLAKE2b = hv
+	hMD5 := md5.New()
+	hSHA1 := sha1.New()
+	hSHA256 := sha256.New()
+	hSHA512 := sha512.New()
+	hSHA3 := sha3.New512()
+	hBLAKE2b, _ := blake2b.New512(make([]byte, 0))
+	eof := false
+	for !eof {
+		var n int
+		n, err = file.Read(buf)
+		if err == io.EOF || err == io.ErrUnexpectedEOF {
+			eof = true
+		} else if err != nil {
+			util.LogError("fsdb:", "hasher:", "Failure reading file", path+":", err)
+			return false
+		}
+		buf = buf[:n]
+		for _, hash := range idata.Hashes {
+			switch hash {
+			case "MD5":
+				hMD5.Write(buf)
+			case "SHA1":
+				hSHA1.Write(buf)
+			case "SHA256":
+				hSHA256.Write(buf)
+			case "SHA512":
+				hSHA512.Write(buf)
+			case "SHA3_512":
+				hSHA3.Write(buf)
+			case "BLAKE2b_512":
+				hBLAKE2b.Write(buf)
+			}
+		}
+		buf = fullBuf
 	}
-	if doUp && stringsu.Contains(idata.Hashes, alg) {
-		hk := strings.ToLower(strings.TrimSuffix(alg, "_512"))
-		DB.Build().Up(ctFile, "hash_"+hk, hv).Wh("id", v.i()).Exe()
+	for _, hash := range idata.Hashes {
+		switch hash {
+		case "MD5":
+			v.MD5 = hex.EncodeToString(hMD5.Sum(nil))
+		case "SHA1":
+			v.SHA1 = hex.EncodeToString(hSHA1.Sum(nil))
+		case "SHA256":
+			v.SHA256 = hex.EncodeToString(hSHA256.Sum(nil))
+		case "SHA512":
+			v.SHA512 = hex.EncodeToString(hSHA512.Sum(nil))
+		case "SHA3_512":
+			v.SHA3 = hex.EncodeToString(hSHA3.Sum(nil))
+		case "BLAKE2b_512":
+			v.BLAKE2b = hex.EncodeToString(hBLAKE2b.Sum(nil))
+		}
 	}
-}
-
-func hash(algo string, pathS string) string {
-	f, _ := os.Open(pathS)
-	defer f.Close()
-	return util.HashStream(algo, f)
+	return true
 }
 
 func (v *File) SetSize(x int64) {
