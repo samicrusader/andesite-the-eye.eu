@@ -39,6 +39,7 @@ func main() {
 	vflag.StringVar(&idata.Config.Public, "public", "", "Public root of files to serve")
 	vflag.StringArrayVar(&idata.Config.SearchOn, "enable-search", []string{}, "Set to a root ID to enable file search for that directory.")
 	vflag.StringArrayVar(&idata.Config.SearchOff, "disable-search", []string{}, "Set to a root ID to disable file search for that directory.")
+	vflag.IntVar(&idata.Config.SearchResultAmt, "search-result-limit", 25, "limit of results to return in /api/search")
 	flagDGS := vflag.String("discord-guild-id", "", "")
 	flagDBT := vflag.String("discord-bot-token", "", "")
 	vflag.BoolVar(&idata.Config.Verbose, "verbose", false, "")

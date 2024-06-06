@@ -51,7 +51,7 @@ func HandleSearchAPI(w http.ResponseWriter, r *http.Request) {
 			q.Wh("hash_"+item, qh)
 		}
 	}
-	fa1 := db.File{}.ScanAll(q.Lm(25))
+	fa1 := db.File{}.ScanAll(q.Lm(int64(idata.Config.SearchResultAmt)))
 	ua := user.GetAccess()
 	fa2 := []*db.File{}
 	//
