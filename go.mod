@@ -1,4 +1,4 @@
-module github.com/nektro/andesite
+module github.com/samicrusader/andesite-the-eye.eu
 
 go 1.16
 
