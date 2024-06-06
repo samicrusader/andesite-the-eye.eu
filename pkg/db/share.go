@@ -20,10 +20,10 @@ func CreateShare(pt string) *Share {
 	dbstorage.InsertsLock.Lock()
 	defer dbstorage.InsertsLock.Unlock()
 	//
-	id := db.QueryNextID(ctShare)
+	id := DB.QueryNextID(ctShare)
 	hv := util.Hash("MD5", []byte(F("astheno.andesite.share.%s.%s", strconv.FormatInt(id, 10), T())))[:12]
 	rv := &Share{id, hv, pt}
-	db.Build().InsI(ctShare, rv).Exe()
+	DB.Build().InsI(ctShare, rv).Exe()
 	return rv
 }
 
@@ -51,7 +51,7 @@ func (v *Share) i() string {
 }
 
 func (Share) b() dbstorage.QueryBuilder {
-	return db.Build().Se("*").Fr(ctShare)
+	return DB.Build().Se("*").Fr(ctShare)
 }
 
 func (Share) All() []*Share {
@@ -78,9 +78,9 @@ func (Share) ByCode(c string) (*Share, bool) {
 
 func (v *Share) SetPath(s string) {
 	v.Path = s
-	Up(v, db, ctShare, "path", s)
+	Up(v, DB, ctShare, "path", s)
 }
 
 func (v *Share) Delete() {
-	Del(v, db, ctShare)
+	Del(v, DB, ctShare)
 }

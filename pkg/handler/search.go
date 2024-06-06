@@ -34,7 +34,7 @@ func HandleSearchAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	q := db.db.Build().Se("*").Fr("files")
+	q := db.DB.Build().Se("*").Fr("files")
 	{
 		qq := r.Form.Get("q")
 		if len(qq) > 0 {
@@ -82,7 +82,7 @@ func HandleSearchRootAPI(root string) http.HandlerFunc {
 			})
 			return
 		}
-		q := db.db.Build().Se("*").Fr("files")
+		q := db.DB.Build().Se("*").Fr("files")
 		{
 			qq := r.Form.Get("q")
 			if len(qq) > 0 {

@@ -44,7 +44,7 @@ func (v *User) i() string {
 }
 
 func (User) b() dbstorage.QueryBuilder {
-	return db.Build().Se("*").Fr(ctUser)
+	return DB.Build().Se("*").Fr(ctUser)
 }
 
 func (User) All() []*User {
@@ -89,21 +89,21 @@ func (v *User) FullName() string {
 
 func (v *User) SetProvider(s string) {
 	v.Provider = s
-	Up(v, db, ctUser, "provider", s)
+	Up(v, DB, ctUser, "provider", s)
 }
 
 func (v *User) SetSnowflake(s string) {
 	v.Snowflake = s
-	Up(v, db, ctUser, "snowflake", s)
+	Up(v, DB, ctUser, "snowflake", s)
 }
 
 func (v *User) ResetPasskey() {
 	s := util.Hash("MD5", []byte(F("astheno.andesite.passkey.%s.%s", v.Snowflake, T())))[0:10]
 	v.PassKey = s
-	Up(v, db, ctUser, "passkey", s)
+	Up(v, DB, ctUser, "passkey", s)
 }
 
 func (v *User) SetName(s string) {
 	v.Name = s
-	Up(v, db, ctUser, "name", s)
+	Up(v, DB, ctUser, "name", s)
 }

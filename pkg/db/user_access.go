@@ -17,9 +17,9 @@ func CreateUserAccess(us *User, pt string) *UserAccess {
 	dbstorage.InsertsLock.Lock()
 	defer dbstorage.InsertsLock.Unlock()
 	//
-	id := db.QueryNextID(ctUserAccess)
+	id := DB.QueryNextID(ctUserAccess)
 	rv := &UserAccess{id, us.ID, pt}
-	db.Build().InsI(ctUserAccess, rv).Exe()
+	DB.Build().InsI(ctUserAccess, rv).Exe()
 	return rv
 }
 
@@ -47,7 +47,7 @@ func (v *UserAccess) i() string {
 }
 
 func (UserAccess) b() dbstorage.QueryBuilder {
-	return db.Build().Se("*").Fr(ctUserAccess)
+	return DB.Build().Se("*").Fr(ctUserAccess)
 }
 
 func (UserAccess) All() []*UserAccess {
@@ -73,14 +73,14 @@ func (UserAccess) ByUser(user *User) []*UserAccess {
 
 func (v *UserAccess) SetUser(u *User) {
 	v.User = u.ID
-	Up(v, db, ctShare, "user", u.i())
+	Up(v, DB, ctShare, "user", u.i())
 }
 
 func (v *UserAccess) SetPath(s string) {
 	v.Path = s
-	Up(v, db, ctShare, "path", s)
+	Up(v, DB, ctShare, "path", s)
 }
 
 func (v *UserAccess) Delete() {
-	Del(v, db, ctShare)
+	Del(v, DB, ctShare)
 }

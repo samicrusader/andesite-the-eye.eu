@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	db dbstorage.Database
+	DB dbstorage.Database
 )
 
 const (
@@ -26,12 +26,12 @@ var (
 )
 
 func Init() {
-	db = etc.Database
-	db.CreateTableStruct(ctUser, User{})
-	db.CreateTableStruct(ctUserAccess, UserAccess{})
-	db.CreateTableStruct(ctShare, Share{})
-	db.CreateTableStruct(ctDiscordRoleAccess, DiscordRoleAccess{})
-	db.CreateTableStruct(ctFile, File{})
+	DB = etc.Database
+	DB.CreateTableStruct(ctUser, User{})
+	DB.CreateTableStruct(ctUserAccess, UserAccess{})
+	DB.CreateTableStruct(ctShare, Share{})
+	DB.CreateTableStruct(ctDiscordRoleAccess, DiscordRoleAccess{})
+	DB.CreateTableStruct(ctFile, File{})
 }
 
 func Upgrade() {
@@ -55,7 +55,7 @@ func Upgrade() {
 }
 
 func Close() {
-	db.Close()
+	DB.Close()
 }
 
 func SaveOAuth2InfoCb(w http.ResponseWriter, r *http.Request, provider string, id string, name string, resp map[string]interface{}) {
@@ -72,7 +72,7 @@ func SaveOAuth2InfoCb(w http.ResponseWriter, r *http.Request, provider string, i
 }
 
 func FolderSize(p string) (size int64, count int64) {
-	rows := db.Build().Se("sum(size), count(*)").Fr(ctFile).WR("path", "like", "?||'%'", true, p).Exe()
+	rows := DB.Build().Se("sum(size), count(*)").Fr(ctFile).WR("path", "like", "?||'%'", true, p).Exe()
 	defer rows.Close()
 	rows.Next()
 	rows.Scan(&size, &count)
