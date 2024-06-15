@@ -11,4 +11,4 @@ go build
 #rm ~/.config/andesite/files.db
 
 # this is about the same config as the main site uses
-./andesite-the-eye.eu --enable-search public --scan-concurrency 8 --verbose --fsdb-verbose --disable-hash sha256 --disable-hash sha512 --disable-hash sha3 --disable-hash blake2b --public $1
+./andesite-the-eye.eu --enable-search public --disable-file-scanner --scan-concurrency 8 --verbose --fsdb-verbose --disable-hash sha256 --disable-hash sha512 --disable-hash sha3 --disable-hash blake2b --public $1

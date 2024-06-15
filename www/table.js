@@ -23,10 +23,6 @@
                 mel[0].parentElement.parentElement.children[1].textContent = x.results[0].path;
                 mel[0].children[0].children[1].value = x.results[0].hash_md5;
                 mel[1].children[0].children[1].value = x.results[0].hash_sha1;
-                mel[2].children[0].children[1].value = x.results[0].hash_sha256;
-                mel[3].children[0].children[1].value = x.results[0].hash_sha512;
-                mel[4].children[0].children[1].value = x.results[0].hash_sha3;
-                mel[5].children[0].children[1].value = x.results[0].hash_blake2b;
                 $(".ui.basic.modal").modal("show");
             })
         });

@@ -14,6 +14,7 @@ type Config struct {
 	Providers       []oauth2.Provider `json:"providers"`
 	SearchOn        []string          `json:"search_on"`
 	SearchOff       []string          `json:"search_off"`
+	NoAutoScan      bool              `json:"disable_file_scanner"`
 	SearchResultAmt int               `json:"search_result_limit"`
 	Verbose         bool              `json:"verbose"`
 	VerboseFS       bool              `json:"verbose_fsdb"`

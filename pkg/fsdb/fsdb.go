@@ -21,11 +21,10 @@ type Job struct {
 }
 
 func Init(mp map[string]string, rt string) {
-	bd, err := mp[rt]
-	if !err {
+	bd, ok := mp[rt]
+	if !ok || idata.Config.NoAutoScan {
 		return
 	}
-
 	jobs := make(chan Job)
 
 	for i := 0; i < idata.Config.ScanSimul; i++ {
