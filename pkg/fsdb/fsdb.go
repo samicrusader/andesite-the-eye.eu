@@ -113,6 +113,9 @@ func worker(jobs <-chan Job) {
 
 func insertFile(job Job, buf []byte) {
 	f := job.f
+	if idata.Config.VerboseFS {
+		util.Log("fsdb:", "processing:", f.Path)
+	}
 	// Check against old DB entry
 	oldentry, ok := db.File{}.ByPath(f.Path)
 	if ok {
@@ -122,10 +125,6 @@ func insertFile(job Job, buf []byte) {
 				util.Log("fsdb:", "skipped:", f.Path)
 			}
 			return
-		}
-
-		if idata.Config.VerboseFS {
-			util.Log("fsdb:", "processing:", oldentry.Path)
 		}
 
 		// File exists but changed
