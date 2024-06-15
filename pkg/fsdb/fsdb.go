@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/karrick/godirwalk"
 	"github.com/nektro/go-util/util"
@@ -91,6 +92,15 @@ func Init(mp map[string]string, rt string) {
 		FollowSymbolicLinks: true,
 	})
 	util.Log("fsdb:", "init: done walking directory", bd)
+
+	// Mark files walking as done
+	atomic.AddInt64(&syncer, -(1 << 62))
+
+	for atomic.LoadInt64(&syncer) != 0 {
+		time.Sleep(time.Millisecond)
+	}
+
+	close(jobs)
 }
 
 func worker(jobs <-chan Job) {
